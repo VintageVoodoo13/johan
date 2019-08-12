@@ -1,0 +1,50 @@
+<?php
+// Checks if form has been submitted
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    function post_captcha($user_response) {
+        $fields_string = '';
+        $fields = array(
+            'secret' => '6LeYmp8UAAAAAChSVSsHFwb9DXWOo7_XmJKcMC6F PRIVATE_KEY 6LeYmp8UAAAAACm3ohs-1PKzGxiTJ-IKzkuMzEin',
+            'response' => $user_response
+        );
+        foreach($fields as $key=>$value)
+        $fields_string .= $key . '=' . $value . '&';
+        $fields_string = rtrim($fields_string, '&');
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+        curl_setopt($ch, CURLOPT_POST, count($fields));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
+
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        return json_decode($result, true);
+    }
+
+    // Call the function post_captcha
+    $res = post_captcha($_POST['g-recaptcha-response']);
+
+    if (!$res['success']) {
+        // What happens when the CAPTCHA wasn't checked
+        echo '<p>Please go back and make sure you check the security CAPTCHA box.</p><br>';
+    } else {
+        // If CAPTCHA is successfully completed...
+
+        // Paste mail function or whatever else you want to happen here!
+        echo '<br><p>CAPTCHA was completed successfully!</p><br>';
+    }
+} else { ?>
+$name = $_POST['name'];
+$email = $_POST['email'];
+$message = $_POST['telephone'];
+
+$message = $_POST['message'];
+$formcontent="From: $name \n Message: $message";
+$recipient = "angeline.slayton@rocketmail.com";
+$subject = "Contact Form";
+$mailheader = "From: $email \r\n";
+mail($recipient, $subject, $formcontent, $mailheader) or die("Error!");
+echo "Thank You!";
+?>
